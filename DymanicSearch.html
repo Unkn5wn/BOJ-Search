@@ -1,0 +1,421 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Retro Neon PS Error Report (Upload/Download)</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+    body {
+      font-family: 'Share Tech Mono', monospace;
+      background: #070B1E;
+      margin: 0;
+      min-height: 100vh;
+      color: #44eef8;
+      letter-spacing: 0.02em;
+      background-image: linear-gradient(rgba(36, 191, 255,0.03) 1px, transparent 2px), linear-gradient(90deg, #06131f 1px, transparent 2px);
+      background-size: 100% 21px, 26px 100%;
+      box-shadow: 0 0 42px #0ff3,0 0 2px #0ff5 inset;
+    }
+    .container {
+      background: rgba(8,20,34,0.96);
+      border: 2.5px solid #09f;
+      border-radius: 16px;
+      padding: 36px 32px 28px 32px;
+      max-width: 950px;
+      margin: 44px auto 22px auto;
+      box-shadow: 0 0 38px #0ff8, 0 0 1px #139fff inset;
+      position:relative;
+      z-index:2;
+    }
+    h2 {
+      color: #00f0ff;
+      font-size:2.2em;
+      text-shadow: 0 0 8px #0ffb,0 0 20px #448aff88;
+      margin-bottom: 8px;
+      letter-spacing: 0.08em;
+    }
+    label {
+      display: block;
+      margin-top: 18px;
+      color: #68ffe1;
+      text-shadow: 0 0 4px #05f1, 0 0 21px #14deff55;
+      font-size: 1.08em;
+    }
+    input[type="text"] {
+      background: #161930;
+      color: #00eefa;
+      border: 1.7px solid #12b8ff;
+      border-radius: 5px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 1.07em;
+      width: 100%;
+      box-sizing: border-box;
+      margin-top: 7px;
+      margin-bottom: 2px;
+      outline: none;
+      box-shadow: 0 0 10px #09f3 inset, 0 0 4px #39f8;
+      transition: border .18s, box-shadow .16s;
+    }
+    input[type="text"]:focus {
+      border: 1.7px solid #0ff;
+      box-shadow: 0 0 16px #13e2fd, 0 0 12px #81f9e0aa;
+    }
+    .row-flex {
+      display: flex;
+      gap: 18px;
+      margin-top: 8px;
+    }
+    .row-flex > div { flex:1; }
+
+    .btn-bar {
+      margin-top: 26px; display: flex; gap: 20px;
+    }
+    button {
+      background: #111722;
+      color: #00eaff;
+      border: 2.2px solid #17e8ff;
+      border-radius: 7px;
+      font-size: 1.11em;
+      cursor: pointer;
+      box-shadow:
+        0 0 20px #19ebfb33,
+        0 0 8px #0ffb inset,
+        0 0 2px #0cf8;
+      transition: background .22s, box-shadow .18s, border-color .13s;
+      font-family: 'Share Tech Mono', monospace;
+      outline: none;
+      padding: 10px 26px;
+      letter-spacing: 0.04em;
+    }
+    button:hover, button:focus {
+      background: #001c33;
+      color: #fff;
+      border: 2.2px solid #57fcfa;
+      box-shadow:
+        0 0 9px #42faff,
+        0 0 33px #009effcc,
+        0 0 12px #0999ff88,
+        0 0 22px #42d9ff55;
+      text-shadow: 0 0 8px #fff, 0 0 25px #00eafe99;
+    }
+    .upload-bar {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin: 20px 0 0 0;
+    }
+    .upload-bar label {
+      margin: 0; font-size:1em; color:#38e0ff; text-shadow:0 0 9px #0ffb;
+    }
+    .upload-bar input[type="file"] {
+      background: #141c36;
+      border: 1.3px solid #1ca0cf;
+      color: #00ecff;
+      border-radius: 5px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size:1em;
+      padding: 4px 6px;
+      margin: 0;
+    }
+    .table-container {
+      overflow-x: auto;
+      margin-top: 22px;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 0;
+      background: #141c36d1;
+      box-shadow: 0 0 18px #09f8;
+    }
+    th, td {
+      border: 1.5px solid #1eb8fccc;
+      padding: 8px 10px;
+      text-align: left;
+    }
+    th {
+      background-color: #09182f;
+      color: #25f6ff;
+      font-size:1em;
+      text-shadow: 0 0 4px #0ef8;
+      letter-spacing: 0.05em;
+    }
+    td {
+      color: #49deff;
+      background: #101b2dfe;
+      font-size:0.98em;
+    }
+    tr:nth-child(even) td {background: #051023ee;}
+    .error-codes {
+      color: #9effff;
+      text-shadow: 0 0 9px #41fff1,0 0 12px #54a2ffcc;
+    }
+    body::before {
+      content: '';
+      pointer-events:none;
+      position: fixed;
+      left:0;top:0;right:0;bottom:0;
+      width:100vw;height:100vh;
+      z-index:1;
+      opacity:0.3;
+      background: repeating-linear-gradient(0deg,#152b40 0px,#162130 1.2px,#060c19 3.2px);
+      mix-blend-mode: lighten;
+    }
+    @media (max-width: 740px) {
+      .container { padding: 4vw; }
+      .row-flex { flex-direction: column; }
+      th, td { font-size: 0.93em; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>NEON PlayStation Error Code Analyzer</h2>
+    <form id="entryForm" onsubmit="addEntry(); return false;">
+      <div class="row-flex">
+        <div>
+          <label>Company Name:
+            <input type="text" id="companyName" required placeholder="e.g. Sony">
+          </label>
+        </div>
+        <div>
+          <label>Link:
+            <input type="text" id="link" required placeholder="e.g. https://yourcompany.com/incident/123">
+          </label>
+        </div>
+        <div>
+          <label>JK String:
+            <input type="text" id="jkString" required placeholder="e.g. 5cbc0dbc654ba5fc">
+          </label>
+        </div>
+      </div>
+      <div class="btn-bar">
+        <button type="submit">Add Entry</button>
+        <button type="button" onclick="downloadTXT()">Download Table as TXT</button>
+      </div>
+      <div class="upload-bar">
+        <label for="uploadTxt">Upload TXT (&nbsp;existing or compatible report&nbsp;):</label>
+        <input type="file" id="uploadTxt" accept=".txt" onchange="uploadTXT(event)">
+      </div>
+    </form>
+    <div class="result">
+      <div class="table-container">
+        <table id="resultsTable" style="display:none;">
+          <thead>
+            <tr>
+              <th>Line</th>
+              <th>Company Name</th>
+              <th>Link</th>
+              <th>JK String</th>
+              <th>Possible Error Codes</th>
+            </tr>
+          </thead>
+          <tbody id="resultsBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Database and matching as before
+    const errorCodes = {
+      ps5: {
+        "CE-108255-1": "An error occurred with the game/application.",
+        "CE-100005-6": "Application cannot load or read data.",
+        "CE-100002-3": "Failed to update the application.",
+        "CE-107938-8": "Failed to update the application.",
+        "CE-105771-1": "Network connection error.",
+        "CE-112839-4": "Network connection error.",
+        "CE-110555-7": "Disc cannot be read.",
+        "CE-110551-3": "Disc cannot be read.",
+        "CE-109573-5": "Error starting the game.",
+        "CE-107857-8": "Error loading or updating the application.",
+        "CE-106485-4": "Problem reading system software or data.",
+        "CE-100006-7": "External storage drive not recognized.",
+        "CE-109737-7": "USB storage device not recognized."
+      },
+      ps4: {
+        "CE-34878-0": "Game has crashed.",
+        "CE-33991-5": "Server/network connection failed.",
+        "CE-33945-4": "Server/network connection failed.",
+        "CE-34335-8": "Hard Disk Drive (HDD) not detected or issue.",
+        "CE-34697-9": "Hard Disk Drive (HDD) not detected or issue.",
+        "CE-30784-2": "USB device not detected.",
+        "CE-35489-9": "Invalid region.",
+        "CE-33676-5": "Item is corrupted or cannot be detected.",
+        "CE-41839-5": "Application error."
+      }
+    };
+    function eq05(a, b) { return a === b || ((a === '0' && b === '5') || (a === '5' && b === '0')); }
+    function getDigits(s) { return (s.match(/\d/g) || []).join(''); }
+    function substrings(s, lengths = [4,5,6,7,8]) {
+      let result = [];
+      for (const L of lengths) {
+        for (let i = 0; i <= s.length - L; ++i) {
+          result.push(s.substr(i, L));
+        }
+      }
+      return result;
+    }
+    function containsAsSubstringWith05(base, code) {
+      for (let i = 0; i <= base.length - code.length; ++i) {
+        let ok = true;
+        for (let j = 0; j < code.length; ++j) {
+          if (!eq05(base[i + j], code[j])) { ok = false; break;}
+        }
+        if (ok) return true;
+      }
+      return false;
+    }
+    function levDist05(s1, s2) {
+      const m = s1.length, n = s2.length;
+      let dp = Array(m+1).fill(0).map(() => Array(n+1).fill(0));
+      for (let i = 0; i <= m; i++) dp[i][0] = i;
+      for (let j = 0; j <= n; j++) dp[0][j] = j;
+      for (let i = 1; i <= m; i++) {
+        for (let j = 1; j <= n; j++) {
+          if (eq05(s1[i-1], s2[j-1])) 
+            dp[i][j] = dp[i-1][j-1];
+          else
+            dp[i][j] = 1 + Math.min(dp[i-1][j-1], dp[i][j-1], dp[i-1][j]);
+        }
+      }
+      return dp[m][n];
+    }
+    function digitsZeroFiveEq(a, b) {
+      if (a.length !== b.length) return false;
+      for (let i = 0; i < a.length; i++) {
+        if (eq05(a[i], b[i])) continue;
+        return false;
+      }
+      return true;
+    }
+    function bestMatchesJK(jkString) {
+      let inputDigits = getDigits(jkString);
+      if (!inputDigits) return [];
+      let inputSubs = substrings(inputDigits);
+      let matches = [];
+      Object.entries(errorCodes).forEach(([console, codes]) => {
+        Object.entries(codes).forEach(([dbCode, description]) => {
+          let dbDigits = getDigits(dbCode);
+          let found = false, level = 10, levScore = 999;
+          if (inputDigits === dbDigits) { 
+            found = true; level = 0; levScore = 0;
+          } 
+          else if (containsAsSubstringWith05(inputDigits, dbDigits)) { 
+            found = true; level = 1; levScore = levDist05(inputDigits, dbDigits);
+          }
+          else {
+            for (const sub of inputSubs) {
+              if (sub.length === dbDigits.length && digitsZeroFiveEq(sub, dbDigits)) {
+                found = true; level = 2; levScore = levDist05(sub, dbDigits);
+                break;
+              }
+            }
+          }
+          if (!found) {
+            let minLev = Infinity;
+            for (const sub of inputSubs.concat([inputDigits])) {
+              let dist = levDist05(sub, dbDigits);
+              if (dist < minLev) minLev = dist;
+            }
+            if (minLev <= Math.floor(dbDigits.length/2)) {
+              found = true;
+              level = 3;
+              levScore = minLev;
+            }
+          }
+          if (found)
+            matches.push({
+              code: dbCode, console, priority: level, levScore, dbDigits
+            });
+        });
+      });
+      matches.sort((a,b) =>
+        a.priority - b.priority ||
+        a.levScore - b.levScore ||
+        a.dbDigits.length - b.dbDigits.length
+      );
+      return matches.slice(0,3).map(entry => `${entry.code} (${entry.console.toUpperCase()})`);
+    }
+    let entryRows = [];
+    function addEntry() {
+      const company = document.getElementById('companyName').value.trim();
+      const link = document.getElementById('link').value.trim();
+      const jkString = document.getElementById('jkString').value.trim();
+      if (!company || !link || !jkString) {
+        alert("Please fill all fields.");
+        return false;
+      }
+      const matches = bestMatchesJK(jkString);
+      entryRows.push({ company, link, jkString, matches });
+      updateTable();
+      document.getElementById('jkString').value = '';
+      document.getElementById('jkString').focus();
+      return false;
+    }
+    function updateTable() {
+      const table = document.getElementById('resultsTable');
+      const tbody = document.getElementById('resultsBody');
+      tbody.innerHTML = '';
+      entryRows.forEach((row, idx) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${idx+1}</td>
+          <td>${row.company}</td>
+          <td>${row.link}</td>
+          <td>${row.jkString}</td>
+          <td class="error-codes">${row.matches.length ? row.matches.join("; ") : '(none found)'}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+      table.style.display = entryRows.length ? '' : 'none';
+    }
+    function downloadTXT() {
+      if (!entryRows.length) {
+        alert("No results to download!");
+        return;
+      }
+      let lines = entryRows.map((row, idx) =>
+        [idx+1, row.company, row.link, row.jkString, row.matches.length ? row.matches.join("; ") : '(none found)'].join(" | ")
+      );
+      const blob = new Blob([lines.join("\n")], {type: "text/plain"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = "ps-error-report.txt";
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 50);
+    }
+    function uploadTXT(evt) {
+      const file = evt.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const text = e.target.result;
+        // Each line: Line | Company Name | Link | JK String | Possible error codes
+        let lines = text.split(/\r?\n/).filter(x => x.trim());
+        let countStart = entryRows.length;
+        lines.forEach(line => {
+          // Try to parse pipe columns
+          const parts = line.split('|').map(x => x.trim());
+          if (parts.length < 5) return; // skip invalid lines
+          let [, company, link, jkString, possible] = parts;
+          // Don't recompute error codes for old data, just import as stored
+          entryRows.push({
+            company, link, jkString, matches: [possible]
+          });
+        });
+        updateTable();
+      };
+      reader.readAsText(file);
+      // Clear file input so you can re-upload same file if needed
+      evt.target.value = "";
+    }
+  </script>
+</body>
+</html>
