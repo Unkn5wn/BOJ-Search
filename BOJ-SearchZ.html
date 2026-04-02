@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Error Code Analyzer (LVK/JID, Multi-Platform Retro Neon)</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+    body {
+      font-family: 'Share Tech Mono', monospace;
+      background: #070B1E;
+      margin: 0;
+      min-height: 100vh;
+      color: #44eef8;
+      letter-spacing: 0.02em;
+      background-image: linear-gradient(rgba(36, 191, 255,0.04) 1px, transparent 2px), linear-gradient(90deg, #06131f 1px, transparent 2px);
+      background-size: 100% 21px, 26px 100%;
+      box-shadow: 0 0 42px #0ff3,0 0 2px #0ff5 inset;
+    }
+    .container {
+      background: rgba(8,20,34,0.97);
+      border: 2.5px solid #09f;
+      border-radius: 16px;
+      padding: 36px 32px 28px 32px;
+      max-width: 1250px;
+      margin: 44px auto 22px auto;
+      box-shadow: 0 0 38px #0ff8, 0 0 1px #139fff inset;
+      position:relative;
+      z-index:2;
+    }
+    h2 {
+      color: #00f0ff;
+      font-size:2.08em;
+      text-shadow: 0 0 8px #0ffb,0 0 20px #448aff88;
+      margin-bottom: 8px;
+      letter-spacing: 0.08em;
+    }
+    label {
+      display: block;
+      margin-top: 18px;
+      color: #68ffe1;
+      text-shadow: 0 0 4px #05f1, 0 0 21px #14deff55;
+      font-size: 1.08em;
+    }
+    input[type="text"] {
+      background: #161930;
+      color: #00eefa;
+      border: 1.7px solid #12b8ff;
+      border-radius: 5px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 1.13em;
+      width: 100%;
+      box-sizing: border-box;
+      margin-top: 7px;
+      margin-bottom: 2px;
+      outline: none;
+      box-shadow: 0 0 10px #09f3 inset, 0 0 4px #39f8;
+      transition: border .18s, box-shadow .16s;
+    }
+    input[type="text"]:focus {
+      border: 1.7px solid #0ff;
+      box-shadow: 0 0 16px #13e2fd, 0 0 12px #81f9e0aa;
+    }
+    .btn-bar {
+      margin-top: 24px; display: flex; gap: 18px;
+    }
+    button {
+      background: #111722;
+      color: #00eaff;
+      border: 2.2px solid #17e8ff;
+      border-radius: 7px;
+      font-size: 1.13em;
+      cursor: pointer;
+      box-shadow:
+        0 0 20px #19ebfb33,
+        0 0 8px #0ffb inset,
+        0 0 2px #0cf8;
+      transition: background .22s, box-shadow .18s, border-color .13s;
+      font-family: 'Share Tech Mono', monospace;
+      outline: none;
+      padding: 10px 26px;
+      letter-spacing: 0.04em;
+    }
+    button:hover, button:focus {
+      background: #001c33;
+      color: #fff;
+      border: 2.2px solid #57fcfa;
+      box-shadow:
+        0 0 9px #42faff,
+        0 0 33px #009effcc,
+        0 0 12px #0999ff88,
+        0 0 22px #42d9ff55;
+      text-shadow: 0 0 8px #fff, 0 0 25px #00eafe99;
+    }
+    .table-container {
+      overflow-x: auto;
+      margin-top: 22px;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 0;
+      background: #141c36d1;
+      box-shadow: 0 0 18px #09f8;
+      min-width: 1280px;
+    }
+    th, td {
+      border: 1.5px solid #1eb8fccc;
+      padding: 8px 10px;
+      text-align: left;
+      font-size:0.95em;
+      max-width: 290px;
+      word-break: break-all;
+    }
+    th {
+      background-color: #09182f;
+      color: #25f6ff;
+      text-shadow: 0 0 4px #0ef8;
+      letter-spacing: 0.04em;
+    }
+    td {
+      color: #49deff;
+      background: #101b2dfe;
+    }
+    tr:nth-child(even) td {background: #051023ee;}
+    .error-codes { font-family: 'Share Tech Mono', monospace; }
+    .ps { color: #66bdff; text-shadow: 0 0 11px #0086ff; }
+    .switch { color: #94ffae; text-shadow: 0 0 10px #3f8; }
+    .xbox { color: #ffd560; text-shadow: 0 0 10px #fd0; }
+    .pc { color: #da8cff; text-shadow: 0 0 12px #93c8ff; }
+    @media (max-width: 800px) {
+      table, th, td { font-size:0.885em; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Error Code Analyzer <span style="font-size:.74em;opacity:.75;">(LVK/JID, Multi-Platform)</span></h2>
+    <form id="entryForm" onsubmit="addEntry(); return false;">
+      <label for="linkInput">Paste a link containing <b>lvk=...</b> or <b>jid=...</b> (or both):</label>
+      <input type="text" id="linkInput" required placeholder="https://www.ziprecruiter.com/...">
+      <div class="btn-bar">
+        <button type="submit">Add Entry</button>
+        <button type="button" onclick="downloadTXT()">Download Table as TXT</button>
+      </div>
+    </form>
+    <div class="result">
+      <div class="table-container">
+        <table id="resultsTable" style="display:none;">
+          <thead>
+            <tr>
+              <th>Line</th>
+              <th>Link</th>
+              <th>LVK String</th>
+              <th>JID String</th>
+              <th class="ps">PS Error Codes</th>
+              <th class="switch">Switch Error Codes</th>
+              <th class="xbox">Xbox Error Codes</th>
+              <th class="pc">PC Error Codes</th>
+            </tr>
+          </thead>
+          <tbody id="resultsBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <script>
+    // --- PS4/PS5 Error Codes (with fuzzy match)
+    const errorCodes = {
+      ps5: {
+        "CE-108255-1": "An error occurred with the game/application.",
+        "CE-100005-6": "Application cannot load or read data.",
+        "CE-100002-3": "Failed to update the application.",
+        "CE-107938-8": "Failed to update the application.",
+        "CE-105771-1": "Network connection error.",
+        "CE-112839-4": "Network connection error.",
+        "CE-110555-7": "Disc cannot be read.",
+        "CE-110551-3": "Disc cannot be read.",
+        "CE-109573-5": "Error starting the game.",
+        "CE-107857-8": "Error loading or updating the application.",
+        "CE-106485-4": "Problem reading system software or data.",
+        "CE-100006-7": "External storage drive not recognized.",
+        "CE-109737-7": "USB storage device not recognized."
+      },
+      ps4: {
+        "CE-34878-0": "Game has crashed.",
+        "CE-33991-5": "Server/network connection failed.",
+        "CE-33945-4": "Server/network connection failed.",
+        "CE-34335-8": "Hard Disk Drive (HDD) not detected or issue.",
+        "CE-34697-9": "Hard Disk Drive (HDD) not detected or issue.",
+        "CE-30784-2": "USB device not detected.",
+        "CE-35489-9": "Invalid region.",
+        "CE-33676-5": "Item is corrupted or cannot be detected.",
+        "CE-41839-5": "Application error."
+      }
+    };
+    function eq05(a, b) { return a === b || ((a === '0' && b === '5') || (a === '5' && b === '0')); }
+    function getDigits(s) { return (s && s.match(/\d/g) || []).join(''); }
+    function substrings(s, lengths = [4,5,6,7,8]) {
+      let result = [];
+      for (const L of lengths) {
+        for (let i = 0; i <= s.length - L; ++i) {
+          result.push(s.substr(i, L));
+        }
+      }
+      return result;
+    }
+    function containsAsSubstringWith05(base, code) {
+      for (let i = 0; i <= base.length - code.length; ++i) {
+        let ok = true;
+        for (let j = 0; j < code.length; ++j) {
+          if (!eq05(base[i + j], code[j])) { ok = false; break;}
+        }
+        if (ok) return true;
+      }
+      return false;
+    }
+    function levDist05(s1, s2) {
+      const m = s1.length, n = s2.length;
+      let dp = Array(m+1).fill(0).map(() => Array(n+1).fill(0));
+      for (let i = 0; i <= m; i++) dp[i][0] = i;
+      for (let j = 0; j <= n; j++) dp[0][j] = j;
+      for (let i = 1; i <= m; i++) {
+        for (let j = 1; j <= n; j++) {
+          if (eq05(s1[i-1], s2[j-1])) 
+            dp[i][j] = dp[i-1][j-1];
+          else
+            dp[i][j] = 1 + Math.min(dp[i-1][j-1], dp[i][j-1], dp[i-1][j]);
+        }
+      }
+      return dp[m][n];
+    }
+    function digitsZeroFiveEq(a, b) {
+      if (a.length !== b.length) return false;
+      for (let i = 0; i < a.length; i++) {
+        if (eq05(a[i], b[i])) continue;
+        return false;
+      }
+      return true;
+    }
+    function bestMatchesPS(jkString) {
+      let inputDigits = getDigits(jkString||"");
+      if (!inputDigits) return [];
+      let inputSubs = substrings(inputDigits);
+      let matches = [];
+      Object.entries(errorCodes).forEach(([console, codes]) => {
+        Object.entries(codes).forEach(([dbCode, description]) => {
+          let dbDigits = getDigits(dbCode);
+          let found = false;
+          let level = 10, levScore = 999;
+          if (inputDigits === dbDigits) { 
+            found = true; level = 0; levScore = 0;
+          } 
+          else if (containsAsSubstringWith05(inputDigits, dbDigits)) { 
+            found = true; level = 1; levScore = levDist05(inputDigits, dbDigits);
+          }
+          else {
+            for (const sub of inputSubs) {
+              if (sub.length === dbDigits.length && digitsZeroFiveEq(sub, dbDigits)) {
+                found = true; level = 2; levScore = levDist05(sub, dbDigits);
+                break;
+              }
+            }
+          }
+          if (!found) {
+            let minLev = Infinity;
+            for (const sub of inputSubs.concat([inputDigits])) {
+              let dist = levDist05(sub, dbDigits);
+              if (dist < minLev) minLev = dist;
+            }
+            if (minLev <= Math.floor(dbDigits.length/2)) {
+              found = true;
+              level = 3;
+              levScore = minLev;
+            }
+          }
+          if (found)
+            matches.push({
+              code: dbCode, console, priority: level, levScore, dbDigits
+            });
+        });
+      });
+      matches.sort((a,b) =>
+        a.priority - b.priority ||
+        a.levScore - b.levScore ||
+        a.dbDigits.length - b.dbDigits.length
+      );
+      return matches.slice(0,3).map(entry => `${entry.code} (${entry.console.toUpperCase()})`);
+    }
+    // --- Nintendo Switch Error Codes
+    const switchErrorCodes = {
+      "2110-1100": "Unable to connect to the Internet.",
+      "2124-5111": "Unable to connect to online services.",
+      "2124-3080": "Function not supported in current country/region.",
+      "2813-0000": "Error while accessing eShop, redeeming codes, or purchasing subscriptions.",
+      "2813-5508": "Eshop balance exceeds maximum ($200).",
+      "2813-2480": "Credit card purchase restricted.",
+      "2819-0031": "Software paused; account used on another console.",
+      "2005-0003": "Cannot download software; possible microSD card issue.",
+      "2002-3005": "System error on startup or waking from sleep.",
+      "2153": "System-level error (Audio, Notification, HTTP, Sleep)",
+      "2154": "System-level error (Audio, Notification, HTTP, Sleep)",
+      "2155": "System-level error (Audio, Notification, HTTP, Sleep)",
+      "2156": "System-level error (Audio, Notification, HTTP, Sleep)"
+    };
+    function substringsSwitch(s, lengths = [4,5,6,7,8,9]) {
+      let result = [];
+      for (const L of lengths) {
+        for (let i = 0; i <= s.length - L; ++i) {
+          result.push(s.substr(i, L));
+        }
+      }
+      return result;
+    }
+    function digitContains(base, code) {
+      return base.indexOf(code) !== -1;
+    }
+    function levDist(s1, s2) {
+      const m = s1.length, n = s2.length;
+      let dp = Array(m+1).fill(0).map(() => Array(n+1).fill(0));
+      for (let i = 0; i <= m; i++) dp[i][0] = i;
+      for (let j = 0; j <= n; j++) dp[0][j] = j;
+      for (let i = 1; i <= m; i++) {
+        for (let j = 1; j <= n; j++) {
+          if (s1[i-1] == s2[j-1]) 
+            dp[i][j] = dp[i-1][j-1];
+          else
+            dp[i][j] = 1 + Math.min(dp[i-1][j-1], dp[i][j-1], dp[i-1][j]);
+        }
+      }
+      return dp[m][n];
+    }
+    function bestMatchesSwitch(jkString) {
+      let inputDigits = getDigits(jkString||"");
+      if (!inputDigits) return [];
+      let inputSubs = substringsSwitch(inputDigits);
+      let matches = [];
+      Object.entries(switchErrorCodes).forEach(([code, desc]) => {
+        let dbDigits = getDigits(code);
+        let found = false, level = 10, levScore = 999;
+        if (inputDigits === dbDigits) { 
+          found = true; level = 0; levScore = 0;
+        } 
+        else if (digitContains(inputDigits, dbDigits)) {
+          found = true; level = 1; levScore = levDist(inputDigits, dbDigits);
+        }
+        else {
+          for (const sub of inputSubs) {
+            if (sub.length === dbDigits.length && sub === dbDigits) {
+              found = true; level = 2; levScore = levDist(sub, dbDigits);
+              break;
+            }
+          }
+        }
+        if (!found) {
+          let minLev = Infinity;
+          for (const sub of inputSubs.concat([inputDigits])) {
+            let dist = levDist(sub, dbDigits);
+            if (dist < minLev) minLev = dist;
+          }
+          if (minLev <= Math.floor(dbDigits.length/2) && dbDigits.length >= 4) {
+            found = true; level = 3; levScore = minLev;
+          }
+        }
+        if (found)
+          matches.push({ code, desc, level, levScore, dbDigits });
+      });
+      matches.sort((a,b) =>
+        a.level - b.level ||
+        a.levScore - b.levScore ||
+        a.dbDigits.length - b.dbDigits.length
+      );
+      return matches.slice(0,3).map(entry => `${entry.code}: ${entry.desc}`);
+    }
+    // --- Xbox Error Codes
+    const xboxErrorCodes = {
+      "E100": "Failed system update/corrupted OS (offline update with USB suggested).",
+      "E101": "Failed system update/corrupted OS.",
+      "E102": "Failed system update or corrupted OS (sometimes failing drive/SSD).",
+      "E103": "Failed system update/corrupted OS.",
+      "E104": "Failed system update/corrupted OS.",
+      "E105": "Failed system update or internal drive failure.",
+      "E106": "Failed system update/corrupted OS.",
+      "E200": "System update error (try reboot/reset).",
+      "E203": "System update error (try reboot/reset).",
+      "E204": "System update error (try reboot/reset).",
+      "E206": "System update error (try reboot/reset).",
+      "E207": "System update error (try reboot/reset).",
+      "8016CE52": "Payment method issue during Xbox purchase.",
+      "809B1004": "Kinect sensor connectivity issue.",
+      "809B1005": "Kinect sensor connectivity issue.",
+      "8B050033": "System update required (not currently available).",
+      "C101A007": "Payment authorization failure.",
+      "1170000": "Xbox Network/service issue or pending game update.",
+      "121010": "Network connectivity issue.",
+      "E74": "Xbox 360: General hardware failure.",
+      "C000-0099": "Xbox 360: System update error.",
+      "C000-0185": "Xbox 360: System update error.",
+      "351f-0000-0080-0300-8007-0570": "Xbox 360: System update failure.",
+      "Error 05": "Original Xbox: HDD not locked.",
+      "Error 07": "Original Xbox: HDD timeout.",
+      "Error 13": "Original Xbox: Dashboard or clock file missing.",
+      "Error 16": "Original Xbox: Dashboard or clock file missing."
+    };
+    const xboxPatterns = [
+      { key: "E100", pattern: /\bE100\b/i },
+      { key: "E101", pattern: /\bE101\b/i },
+      { key: "E102", pattern: /\bE102\b/i },
+      { key: "E103", pattern: /\bE103\b/i },
+      { key: "E104", pattern: /\bE104\b/i },
+      { key: "E105", pattern: /\bE105\b/i },
+      { key: "E106", pattern: /\bE106\b/i },
+      { key: "E200", pattern: /\bE200\b/i },
+      { key: "E203", pattern: /\bE203\b/i },
+      { key: "E204", pattern: /\bE204\b/i },
+      { key: "E206", pattern: /\bE206\b/i },
+      { key: "E207", pattern: /\bE207\b/i },
+      { key: "8016CE52", pattern: /8016CE52/i },
+      { key: "809B1004", pattern: /809B1004/i },
+      { key: "809B1005", pattern: /809B1005/i },
+      { key: "8B050033", pattern: /8B050033/i },
+      { key: "C101A007", pattern: /C101A007/i },
+      { key: "1170000", pattern: /1170000/ },
+      { key: "121010", pattern: /121010/ },
+      { key: "E74", pattern: /\bE74\b/i },
+      { key: "C000-0099", pattern: /C000[\-\s]?0099/i },
+      { key: "C000-0185", pattern: /C000[\-\s]?0185/i },
+      { key: "351f-0000-0080-0300-8007-0570", pattern: /351f[\- ]?0000[\- ]?0080[\- ]?0300[\- ]?8007[\- ]?0570/i },
+      { key: "Error 05", pattern: /Error[\s\-]?05\b/i },
+      { key: "Error 07", pattern: /Error[\s\-]?07\b/i },
+      { key: "Error 13", pattern: /Error[\s\-]?13\b/i },
+      { key: "Error 16", pattern: /Error[\s\-]?16\b/i }
+    ];
+    function bestMatchesXbox(sourceStr) {
+      if (!sourceStr) return [];
+      let matches = [];
+      for (const {key, pattern} of xboxPatterns) {
+        if (pattern.test(sourceStr)) {
+          matches.push(`${key}: ${xboxErrorCodes[key]}`);
+        }
+      }
+      if (!matches.length) {
+        let s = (sourceStr.match(/[a-zA-Z0-9\-\s]+/g) || []).join('');
+        for (const [code, desc] of Object.entries(xboxErrorCodes)) {
+          if (s.toLowerCase().replace(/\s+/g,'').includes(code.toLowerCase().replace(/\s+/g,''))) {
+            matches.push(`${code}: ${desc}`);
+          }
+        }
+      }
+      return matches.length ? matches : [];
+    }
+    // --- PC Error Codes
+    const pcErrorCodes = {
+      "0xc0000005": "Access Violation: Often in MS Flight Sim or Sea of Thieves; indicates game tried to access disallowed memory.",
+      "0x000000A5": "ACPI_BIOS_ERROR: BIOS not fully ACPI-compliant, often causing crashes.",
+      "0xc0000221": "STATUS_IMAGE_CHECKSUM_MISMATCH: Hard drive, RAM, or corrupted system file issue.",
+      "DXGI_ERROR_DEVICE_REMOVED": "Graphics driver crash or GPU unplugged (overheating/overclocks).",
+      "VAN -100": "Riot Vanguard: Anti-cheat connection error.",
+      "VAN -101": "Riot Vanguard: Anti-cheat connection error.",
+      "Steam Error -118": "Steam: Connection timeout with Steam services."
+    };
+    const pcErrorPatterns = [
+      { key: "0xc0000005", pattern: /0x[cC]0000005/ },
+      { key: "0x000000A5", pattern: /0x0{6}[aA]5/ },
+      { key: "0xc0000221", pattern: /0x[cC]0000221/ },
+      { key: "DXGI_ERROR_DEVICE_REMOVED", pattern: /DXGI[_\-\s]?ERROR[_\-\s]?DEVICE[_\-\s]?REMOVED/i },
+      { key: "VAN -100", pattern: /VAN ?-?100/ },
+      { key: "VAN -101", pattern: /VAN ?-?101/ },
+      { key: "Steam Error -118", pattern: /Steam Error ?-?118/i }
+    ];
+    function getDigitsAndAlpha(s) {
+      return (s.match(/[a-zA-Z0-9\-_]+/g) || []).join('');
+    }
+    function bestMatchesPC(sourceStr) {
+      if (!sourceStr) return [];
+      let matches = [];
+      for (const {key, pattern} of pcErrorPatterns) {
+        if (pattern.test(sourceStr)) {
+          matches.push(`${key}: ${pcErrorCodes[key]}`);
+        }
+      }
+      if (!matches.length) {
+        let normalized = getDigitsAndAlpha(sourceStr).toLowerCase();
+        for (const [code, desc] of Object.entries(pcErrorCodes)) {
+          if (normalized.includes(code.toLowerCase().replace(/[^\w]/g,''))) {
+            matches.push(`${code}: ${desc}`);
+          }
+        }
+      }
+      return matches.length ? matches : [];
+    }
+    // --- Utility parameter extractors
+    function extractParam(link, param) {
+      if (!link) return "";
+      let regex = new RegExp("[?&]"+param+"=([^&#]+)");
+      let match = link.match(regex);
+      return match ? match[1] : "";
+    }
+    function bestMatchesAll(s) {
+      return {
+        ps: bestMatchesPS(s),
+        switch: bestMatchesSwitch(s),
+        xbox: bestMatchesXbox(s),
+        pc: bestMatchesPC(s)
+      }
+    }
+    let entryRows = [];
+    function addEntry() {
+      const link = document.getElementById('linkInput').value.trim();
+      if (!link) {
+        alert("Please paste a link.");
+        return false;
+      }
+      const lvkString = extractParam(link, "lvk");
+      const jidString = extractParam(link, "jid");
+      if (!lvkString && !jidString) {
+        alert("Could not find an 'lvk' or 'jid' parameter in the link.");
+        return false;
+      }
+      const errorsLVK = lvkString ? bestMatchesAll(lvkString) : {ps:[], switch:[], xbox:[], pc:[]};
+      const errorsJID = jidString ? bestMatchesAll(jidString) : {ps:[], switch:[], xbox:[], pc:[]};
+      function combineArr(a,b) { return Array.from(new Set([...(a||[]), ...(b||[])])); }
+      entryRows.push({
+        link, lvkString, jidString,
+        matchesPS: combineArr(errorsLVK.ps, errorsJID.ps),
+        matchesSwitch: combineArr(errorsLVK.switch, errorsJID.switch),
+        matchesXbox: combineArr(errorsLVK.xbox, errorsJID.xbox),
+        matchesPC: combineArr(errorsLVK.pc, errorsJID.pc)
+      });
+      updateTable();
+      document.getElementById('linkInput').value = '';
+      document.getElementById('linkInput').focus();
+      return false;
+    }
+    function updateTable() {
+      const table = document.getElementById('resultsTable');
+      const tbody = document.getElementById('resultsBody');
+      tbody.innerHTML = '';
+      entryRows.forEach((row, idx) => {
+        function tdErr(arr, css) {return `<td class="error-codes ${css}">${arr.length ? arr.join("; ") : '(none found)'}</td>`;}
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${idx+1}</td>
+          <td>${row.link}</td>
+          <td>${row.lvkString || ""}</td>
+          <td>${row.jidString || ""}</td>
+          ${tdErr(row.matchesPS,'ps')}
+          ${tdErr(row.matchesSwitch,'switch')}
+          ${tdErr(row.matchesXbox,'xbox')}
+          ${tdErr(row.matchesPC,'pc')}
+        `;
+        tbody.appendChild(tr);
+      });
+      table.style.display = entryRows.length ? '' : 'none';
+    }
+    function downloadTXT() {
+      if (!entryRows.length) {
+        alert("No results to download!");
+        return;
+      }
+      let lines = entryRows.map((row, idx) =>
+        [
+          idx+1,
+          row.link,
+          row.lvkString || "",
+          row.jidString || "",
+          row.matchesPS.length ? row.matchesPS.join("; ") : '(none found)',
+          row.matchesSwitch.length ? row.matchesSwitch.join("; ") : '(none found)',
+          row.matchesXbox.length ? row.matchesXbox.join("; ") : '(none found)',
+          row.matchesPC.length ? row.matchesPC.join("; ") : '(none found)'
+        ].join(" | ")
+      );
+      const blob = new Blob([lines.join("\n")], {type: "text/plain"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = "multiplat-error-report-lvk-jid.txt";
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 50);
+    }
+  </script>
+</body>
+</html>
