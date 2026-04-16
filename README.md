@@ -1,2 +1,0 @@
-# BOJ-Search
-BOJ Search
